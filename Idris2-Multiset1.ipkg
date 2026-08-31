@@ -1,0 +1,21 @@
+package Idris2-Multiset1
+version = 0.1.0
+authors = "Justin Kelly"
+brief   = "Layer 1 Modernized O(log N) Multiset Trees, Spread Polynumbers, SingFractions, and Galois Law Algebra."
+
+depends = base
+        , Idris2-Multiset0
+
+modules = Core.BoxInt
+        , Core.Multiset
+        , Core.MultisetTree
+        , Core.Polynumber
+        , Core.UnixelFraction
+        , Core.VexelMaxel
+        , Core.UniverseState
+        , Core.Interfaces.StatefulLaw
+        , Core.LinearBuffer
+        , Core.TransformMultiset
+        , Math.LawAlgebra
+
+sourcedir = "src"
