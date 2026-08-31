@@ -1,32 +1,26 @@
-# 🗃️ Idris2-Multiset2
+# 🌀 Idris2-Multiset1
 
-**Next-Generation Constructive Multiset Data Structures in [Idris 2](https://github.com/idris-lang/Idris2): $O(\log N)$ Multiset Search Trees, Reflected Polynumbers, SingFractions, and Galois Law Algebra.**
+**Multiset 2-Category, Transform Monoids & Quantum Density Matrices for Idris 2**
 
-[![Idris2](https://img.shields.io/badge/Idris2-Multiset2-blue.svg)](https://github.com/idris-lang/Idris2)
-
----
-
-## 🏛️ Overview
-
-`Idris2-Multiset2` extracts and modularizes the high-performance multiset structures from [`Idris2-Universe2`](../Idris2-Universe2), creating a standalone Layer 1 data structure library.
-
-### Core Modules
-
-1. **`Core.MultisetTree`**: Balanced Binary Search Trees providing $O(\log N)$ token insertion, lookup, and multiplicity preservation.
-2. **`Core.Polynumber`**: Reflected Polynumber multisets, Goh Factorization, Cyclotomic Division ($\Phi_{137}$), and Spread Polynumbers $S_n(s)$.
-3. **`Core.UnixelFraction`**: `SingFraction` / rational Hehner chance fractions with exact cross-multiplication equivalence (`rationalEquiv f1 f2`).
-4. **`Core.VexelMaxel`**: Tensor multiset hierarchy: `Unixel` [n], `Pixel` [i,j], `Voxel` [x,y,z], `Vexel` (1D), `Maxel` (2D), `Boxel` (3D), and `HyperBoxel` (4D).
-5. **`Math.LawAlgebra`**: Typed Law Algebra Monoid ($\wedge, \otimes$), multiset pushforward ($f_*$), inverse image pullback ($f^*$), and Galois Connections ($f_* \dashv f^*$).
+`Idris2-Multiset1` builds upon `Idris2-Multiset0` to implement categorical state dynamics:
+- `TransformMultiset`: 1-cell law transforms ($T: a \to b$) mapping multiset state configurations across metric sectors.
+- **Lie Bracket Commutators**: $[T_1, T_2] = (T_1 \circ T_2) \ominus (T_2 \circ T_1)$ using exact multiset subtraction `subBox`.
+- **Quantum Density Matrices**: Positive semi-definite operator multisets $\rho$ with exact trace normalization ($\text{Tr}(\rho) = 1$) and partial trace extraction.
+- **Hyper-Tensors**: Multidimensional discrete contraction networks.
 
 ---
 
-## 🛠️ Building & Installing
+## 🚀 Building & Installing
+
+Built with Idris 2 (`0.8.0`):
 
 ```bash
-toolbox run -c fedora-toolbox-44 /var/home/justin/.local/bin/idris2 --build Idris2-Multiset2.ipkg
-toolbox run -c fedora-toolbox-44 /var/home/justin/.local/bin/idris2 --install Idris2-Multiset2.ipkg
+idris2 --build Idris2-Multiset1.ipkg
+idris2 --install Idris2-Multiset1.ipkg
 ```
 
 ---
 
-© Justin Kelly. All rights reserved.
+## 🔬 Language & Framework Integration
+
+Written in **Idris 2** enforcing total constructivism (`%default total`).
