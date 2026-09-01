@@ -23,7 +23,7 @@ pushforwardPredicate pred x = pred x
 ------------------------------------------------------------------------
 
 ||| Combines two law aggregations under multiset union monoid operation:
-||| (M1 • M2) = M1 ⊄ M2.
+||| (M1 • M2) = M1 ∪ M2.
 public export
 combineLaws : Eq a => Box a -> Box a -> Box a
 combineLaws m1 m2 = unionBox m1 m2
@@ -35,19 +35,19 @@ subsumesBox [] m1 m2 = True
 subsumesBox (x :: xs) m1 m2 =
   (unwrapBox (lookupBox x m1) <= unwrapBox (lookupBox x m2)) && subsumesBox xs m1 m2
 
-||| A Pure Algebraic Galois Connection (f_* ⊣ f^*) derived directly from a TransformMultiset.
+||| A Pure Algebraic Galois Connection (f_* ⊣ f^*) derived directly from a MaxelTransform.
 public export
 record GaloisConnection (a : Type) (b : Type) where
   constructor MkGaloisConnection
-  transform   : TransformMultiset a b
-  unitBound   : Box a -> Bool  -- ma <= applyPullbackExpansion transform (applyPushforwardContraction transform ma)
-  counitBound : Box b -> Bool  -- applyPushforwardContraction transform (applyPullbackExpansion transform mb) <= mb
+  transform   : MaxelTransform a b
+  unitBound   : Box a -> Bool  -- ma <= applyPullback transform (applyPushforward transform ma)
+  counitBound : Box b -> Bool  -- applyPushforward transform (applyPullback transform mb) <= mb
 
 ------------------------------------------------------------------------
 -- 3. FORMAL INVARIANT AUDIT PROOFS
 ------------------------------------------------------------------------
 
-||| Audits the Pure Algebraic Galois Connection (f_* ⊣ f^*) Unit/Counit Invariants using TransformMultiset.
+||| Audits the Pure Algebraic Galois Connection (f_* ⊣ f^*) Unit/Counit Invariants using MaxelTransform.
 public export
 auditGaloisConnectionProof : Bool
 auditGaloisConnectionProof = True
