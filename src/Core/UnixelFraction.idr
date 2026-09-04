@@ -35,13 +35,7 @@ record UnixelFraction where
   num : BoxInt
   den : Unixel
 
-public export
-0 SingFraction : Type
-SingFraction = UnixelFraction
 
-public export
-0 MkFraction : BoxInt -> Unixel -> UnixelFraction
-MkFraction = MkUnixelFraction
 
 ||| Smart constructor building a UnixelFraction with clamped non-zero denominator.
 public export
@@ -59,11 +53,11 @@ public export
 unitUnixelFraction : UnixelFraction
 unitUnixelFraction = mkUnixelFraction (intToBoxInt 1) 1
 
-||| Addition of SingFractions: (n1/d1) + (n2/d2) = (n1*d2 + n2*d1) / (d1*d2)
+||| Addition of UnixelFractions: (n1/d1) + (n2/d2) = (n1*d2 + n2*d1) / (d1*d2)
 public export
 addUnixelFraction : UnixelFraction -> UnixelFraction -> UnixelFraction
 addUnixelFraction (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUnixel d2)) =
-  if natEq d1 d2
+  if d1 == d2
      then mkUnixelFraction (n1 + n2) d1
      else
        let d1Int = natToBoxInt d1
@@ -72,11 +66,11 @@ addUnixelFraction (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUn
            newDen = d1 * d2
        in mkUnixelFraction newNum newDen
 
-||| Subtraction of SingFractions: (n1/d1) - (n2/d2) = (n1*d2 - n2*d1) / (d1*d2)
+||| Subtraction of UnixelFractions: (n1/d1) - (n2/d2) = (n1*d2 - n2*d1) / (d1*d2)
 public export
 subUnixelFraction : UnixelFraction -> UnixelFraction -> UnixelFraction
 subUnixelFraction (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUnixel d2)) =
-  if natEq d1 d2
+  if d1 == d2
      then mkUnixelFraction (n1 - n2) d1
      else
        let d1Int = natToBoxInt d1
@@ -85,7 +79,7 @@ subUnixelFraction (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUn
            newDen = d1 * d2
        in mkUnixelFraction newNum newDen
 
-||| Multiplication of SingFractions: (n1/d1) * (n2/d2) = (n1*n2) / (d1*d2)
+||| Multiplication of UnixelFractions: (n1/d1) * (n2/d2) = (n1*n2) / (d1*d2)
 public export
 mulUnixelFraction : UnixelFraction -> UnixelFraction -> UnixelFraction
 mulUnixelFraction (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUnixel d2)) =
@@ -93,13 +87,11 @@ mulUnixelFraction (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUn
       newDen = d1 * d2
   in mkUnixelFraction newNum newDen
 
-||| Cross-multiplication equivalence between two SingFractions: n1 * d2 == n2 * d1.
+||| Cross-multiplication equivalence between two UnixelFractions: n1 * d2 == n2 * d1.
 public export
 rationalEquiv : UnixelFraction -> UnixelFraction -> Bool
 rationalEquiv (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUnixel d2)) =
-  let d1Int = natToBoxInt d1
-      d2Int = natToBoxInt d2
-  in (n1 * d2Int) == (n2 * d1Int)
+  (n1 * natToBoxInt d2) == (n2 * natToBoxInt d1)
 
 ||| Negation of a UnixelFraction.
 public export
@@ -120,13 +112,15 @@ boxToNat (MkBoxInt v) =
 
 ||| Inversion / Division: (n1/d1) / (n2/d2) where n2 != 0.
 public export
-divSingFraction : UnixelFraction -> UnixelFraction -> UnixelFraction
-divSingFraction (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUnixel d2)) =
+divUnixelFraction : UnixelFraction -> UnixelFraction -> UnixelFraction
+divUnixelFraction (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUnixel d2)) =
   let d2Int = natToBoxInt d2
       newNum = n1 * d2Int
       dDenom = let d = boxToNat n2 in if d == 0 then 1 else d
       signAdj = if unwrapBox n2 < 0 then -1 else 1
   in mkUnixelFraction (newNum * intToBoxInt signAdj) (d1 * dDenom)
+
+
 
 ||| Rational Equality via cross-multiplication: n1 * d2 == n2 * d1
 public export
@@ -144,20 +138,22 @@ Show UnixelFraction where
 
 ||| Pure linear consumption of a UnixelFraction token.
 public export
-linearConsumeSingFraction : (1 frac : UnixelFraction) -> UnixelFraction
-linearConsumeSingFraction (MkUnixelFraction n d) = MkUnixelFraction n d
+linearConsumeUnixelFraction : (1 frac : UnixelFraction) -> UnixelFraction
+linearConsumeUnixelFraction (MkUnixelFraction n d) = MkUnixelFraction n d
 
 ||| Linear scaling of a fractional multiset by a linear BoxInt factor.
 public export
-linearScaleSingFraction : (1 frac : UnixelFraction) -> (1 scale : BoxInt) -> UnixelFraction
-linearScaleSingFraction (MkUnixelFraction (MkBoxInt n) d) (MkBoxInt s) =
+linearScaleUnixelFraction : (1 frac : UnixelFraction) -> (1 scale : BoxInt) -> UnixelFraction
+linearScaleUnixelFraction (MkUnixelFraction (MkBoxInt n) d) (MkBoxInt s) =
   MkUnixelFraction (MkBoxInt (s * n)) d
 
 ||| Linearly split a UnixelFraction into two parts according to an integer partition p.
 public export
-linearSplitSingFraction : (1 frac : UnixelFraction) -> (p : BoxInt) -> (UnixelFraction, UnixelFraction)
-linearSplitSingFraction (MkUnixelFraction (MkBoxInt n) d) (MkBoxInt p) =
+linearSplitUnixelFraction : (1 frac : UnixelFraction) -> (p : BoxInt) -> (UnixelFraction, UnixelFraction)
+linearSplitUnixelFraction (MkUnixelFraction (MkBoxInt n) d) (MkBoxInt p) =
   (MkUnixelFraction (MkBoxInt p) d, MkUnixelFraction (MkBoxInt (n - p)) d)
+
+
 
 ------------------------------------------------------------------------
 -- 4. CONTINUED FRACTIONS & OPTIMAL RATIONAL CONVERGENTS
@@ -186,7 +182,7 @@ fromContinuedFraction [] = zeroUnixelFraction
 fromContinuedFraction [a] = mkUnixelFraction a 1
 fromContinuedFraction (a :: rest) =
   let restFrac = fromContinuedFraction rest
-      oneOverRest = divSingFraction unitUnixelFraction restFrac
+      oneOverRest = divUnixelFraction unitUnixelFraction restFrac
       aFrac = mkUnixelFraction a 1
   in addUnixelFraction aFrac oneOverRest
 
@@ -215,12 +211,14 @@ Show SternBrocotBranch where
   show BranchR = "R"
 
 public export
-mediantSingFraction : UnixelFraction -> UnixelFraction -> UnixelFraction
-mediantSingFraction (MkUnixelFraction (MkBoxInt n1) (MkUnixel d1))
+mediantUnixelFraction : UnixelFraction -> UnixelFraction -> UnixelFraction
+mediantUnixelFraction (MkUnixelFraction (MkBoxInt n1) (MkUnixel d1))
                     (MkUnixelFraction (MkBoxInt n2) (MkUnixel d2)) =
   let newNum = MkBoxInt (n1 + n2)
       newDen = d1 + d2
   in mkUnixelFraction newNum newDen
+
+
 
 public export
 toSternBrocotPath : (fuel : Nat) -> UnixelFraction -> List SternBrocotBranch
@@ -230,7 +228,7 @@ toSternBrocotPath fuel target =
     helper : Nat -> UnixelFraction -> UnixelFraction -> UnixelFraction -> List SternBrocotBranch
     helper Z _ _ _ = []
     helper (S f) l r q =
-      let m = mediantSingFraction l r
+      let m = mediantUnixelFraction l r
           (MkUnixelFraction nq (MkUnixel dq)) = q
           (MkUnixelFraction nm (MkUnixel dm)) = m
           crossDiff = (nq * natToBoxInt dm) - (nm * natToBoxInt dq)
@@ -246,12 +244,12 @@ fromSternBrocotPath path =
   helper path zeroUnixelFraction (MkUnixelFraction (intToBoxInt 1) (MkUnixel 0))
   where
     helper : List SternBrocotBranch -> UnixelFraction -> UnixelFraction -> UnixelFraction
-    helper [] l r = mediantSingFraction l r
+    helper [] l r = mediantUnixelFraction l r
     helper (BranchL :: rest) l r =
-      let m = mediantSingFraction l r
+      let m = mediantUnixelFraction l r
       in helper rest l m
     helper (BranchR :: rest) l r =
-      let m = mediantSingFraction l r
+      let m = mediantUnixelFraction l r
       in helper rest m r
 
 public export

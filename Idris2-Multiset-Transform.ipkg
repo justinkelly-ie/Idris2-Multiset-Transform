@@ -1,10 +1,10 @@
-package Idris2-Multiset1
+package Idris2-Multiset-Transform
 version = 0.1.0
 authors = "Justin Kelly"
 brief   = "Layer 1 Modernized O(log N) Multiset Trees, Spread Polynumbers, SingFractions, and Galois Law Algebra."
 
 depends = base
-        , Idris2-Multiset0
+        , Idris2-Multiset-Core
 
 modules = Core.BoxInt
         , Core.Multiset
