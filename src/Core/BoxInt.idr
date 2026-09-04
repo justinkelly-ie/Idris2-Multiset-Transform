@@ -66,6 +66,10 @@ public export
 Show BoxInt where
   show (MkBoxInt a) = "[" ++ show a ++ "]"
 
+public export
+absBox : BoxInt -> BoxInt
+absBox (MkBoxInt a) = MkBoxInt (abs a)
+
 ------------------------------------------------------------------------
 -- FAST O(log k) BINARY EXPONENTIATION UTILITIES
 ------------------------------------------------------------------------
