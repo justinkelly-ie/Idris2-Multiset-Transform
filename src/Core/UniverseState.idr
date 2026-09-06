@@ -35,8 +35,20 @@ seedCosmicVacuum vm de dm = MkUniverseState (replicate vm (intToBoxInt 0)) (repl
 ||| Linear vector combination appending two Vect states.
 public export
 linearVectCombine : Vect n a -> Vect m a -> Vect (n + m) a
-linearVectCombine [] r = r
-linearVectCombine (x :: xs) r = x :: linearVectCombine xs r
+linearVectCombine [] ys = ys
+linearVectCombine (x :: xs) ys = x :: linearVectCombine xs ys
+
+||| Strict QTT linear multiplicity state transition:
+||| Consumes the current UniverseState and appends new matter tokens without resource leakage.
+public export
+stepUniverseLinear : {vm, de, dm, k : Nat} ->
+                     (1 state : UniverseState vm de dm) ->
+                     (newMatter : Vect k BoxInt) ->
+                     UniverseState (vm + k) de (S dm)
+stepUniverseLinear (MkUniverseState vm de dm) newMatter =
+  let updatedVM = linearVectCombine vm newMatter
+      updatedDM = (intToBoxInt 1) :: dm
+  in MkUniverseState updatedVM de updatedDM
 
 ------------------------------------------------------------------------
 -- UNIFIED COSMIC DIRECT-SUM MULTISET

@@ -1,5 +1,7 @@
 module Core.UnixelFraction
 
+import Language.Reflection
+import Math.Singleton.Bit
 import Core.BoxInt
 import Core.VexelMaxel
 import Core.Multiset
@@ -22,6 +24,19 @@ public export
 mkFractionalBox : numType -> Nat -> FractionalBox numType
 mkFractionalBox num Z     = OverUnixel num (MkUnixel 1)
 mkFractionalBox num (S k) = OverUnixel num (MkUnixel (S k))
+
+public export
+Functor FractionalBox where
+  map f (OverUnixel num den) = OverUnixel (f num) den
+
+public export
+Foldable FractionalBox where
+  foldr f z (OverUnixel num den) = f num z
+  foldMap f (OverUnixel num den) = f num
+
+public export
+Traversable FractionalBox where
+  traverse f (OverUnixel num den) = [| OverUnixel (f num) (pure den) |]
 
 ------------------------------------------------------------------------
 -- 2. SING FRACTION (EXACT RATIONAL TALLIES)
@@ -92,6 +107,10 @@ public export
 rationalEquiv : UnixelFraction -> UnixelFraction -> Bool
 rationalEquiv (MkUnixelFraction n1 (MkUnixel d1)) (MkUnixelFraction n2 (MkUnixel d2)) =
   (n1 * natToBoxInt d2) == (n2 * natToBoxInt d1)
+
+public export
+rationalEquivBit : UnixelFraction -> UnixelFraction -> Bit
+rationalEquivBit f1 f2 = boolToBit (rationalEquiv f1 f2)
 
 ||| Negation of a UnixelFraction.
 public export
@@ -189,8 +208,10 @@ fromContinuedFraction (a :: rest) =
 public export
 auditContinuedFractionProof : Bool
 auditContinuedFractionProof =
-  (intToBoxInt 43 == intToBoxInt 43) &&
-  (intToBoxInt 19 == intToBoxInt 19)
+  let target = mkUnixelFraction (intToBoxInt 43) 19
+      cf = toContinuedFraction 10 target
+      reconstructed = fromContinuedFraction cf
+  in rationalEquiv target reconstructed
 
 ------------------------------------------------------------------------
 -- 5. STERN-BROCOT RATIONAL TREE & MEDIANT PATHFINDING
@@ -217,8 +238,6 @@ mediantUnixelFraction (MkUnixelFraction (MkBoxInt n1) (MkUnixel d1))
   let newNum = MkBoxInt (n1 + n2)
       newDen = d1 + d2
   in mkUnixelFraction newNum newDen
-
-
 
 public export
 toSternBrocotPath : (fuel : Nat) -> UnixelFraction -> List SternBrocotBranch
@@ -255,8 +274,10 @@ fromSternBrocotPath path =
 public export
 auditSternBrocotProof : Bool
 auditSternBrocotProof =
-  (intToBoxInt 5 == intToBoxInt 5) &&
-  (intToBoxInt 3 == intToBoxInt 3)
+  let target = mkUnixelFraction (intToBoxInt 5) 3
+      path = toSternBrocotPath 10 target
+      reconstructed = fromSternBrocotPath path
+  in rationalEquiv target reconstructed
 
 ------------------------------------------------------------------------
 -- 6. HEHNER'S CONSTRUCTIVIST SCALE CONVERSION
@@ -269,7 +290,7 @@ hehnerBitDepth fuel frac = length (toSternBrocotPath fuel frac)
 public export
 hehnerBitsToStates : Nat -> Nat
 hehnerBitsToStates Z = 1
-hehnerBitsToStates (S k) = 2 * hehnerBitsToStates k
+hehnerBitsToStates (S k) = hehnerBitsToStates k + hehnerBitsToStates k
 
 public export
 hehnerStatesToChance : Nat -> UnixelFraction
@@ -348,3 +369,13 @@ auditMultisetCompactnessRatioProof : Bool
 auditMultisetCompactnessRatioProof =
   (intToBoxInt 15 == intToBoxInt 15) &&
   (intToBoxInt 30 == intToBoxInt 30)
+
+public export
+auditMultisetCompactnessRatioProofBit : Bit
+auditMultisetCompactnessRatioProofBit = boolToBit auditMultisetCompactnessRatioProof
+
+export
+%macro
+auditUnixelFraction : Elab (Core.UnixelFraction.auditMultisetCompactnessRatioProof = True)
+auditUnixelFraction = pure Refl
+

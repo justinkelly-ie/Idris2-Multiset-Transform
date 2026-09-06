@@ -1,8 +1,8 @@
 module Core.TransformMultiset
 
-import Core.BoxInt
-import Core.Multiset
-import Core.UnixelFraction
+import public Core.BoxInt
+import public Core.Multiset
+import public Core.UnixelFraction
 import Data.List
 import Data.Vect
 
@@ -197,20 +197,8 @@ adjunctionCounitKernel : Eq a => Eq b => MaxelTransform a b -> MaxelTransform b 
 adjunctionCounitKernel t = composeMaxels (transposeMaxel t) t
 
 ------------------------------------------------------------------------
--- 8. SPECTRAL MULTISET POWER ITERATION SOLVER
 ------------------------------------------------------------------------
-
-||| Computes the Perron-Frobenius stationary ground state distribution of an endomorphism
-||| maxel transform via power iteration under structural fuel bounds.
-public export
-computeStationaryDistribution : Eq a => MaxelTransform a a -> Nat -> Box a -> Box a
-computeStationaryDistribution transform 0 initial = initial
-computeStationaryDistribution transform (S fuel) initial =
-  let nextState = applyPushforward transform initial
-  in computeStationaryDistribution transform fuel nextState
-
-------------------------------------------------------------------------
--- 9. UNITARY CLASS & COMMUTATOR DERIVATIONS
+-- 8. UNITARY CLASS & COMMUTATOR DERIVATIONS
 ------------------------------------------------------------------------
 
 ||| Constructs an Identity MaxelTransform I_a over a given domain list.
@@ -222,6 +210,19 @@ identityMaxel domain =
 public export
 identityTransform : Eq a => List a -> MaxelTransform a a
 identityTransform = identityMaxel
+
+------------------------------------------------------------------------
+-- 9. SPECTRAL MULTISET POWER ITERATION SOLVER
+------------------------------------------------------------------------
+
+||| Computes the Perron-Frobenius stationary ground state distribution of an endomorphism
+||| maxel transform via power iteration under structural fuel bounds.
+public export
+computeStationaryDistribution : Eq a => MaxelTransform a a -> Nat -> Box a -> Box a
+computeStationaryDistribution transform 0 initial = initial
+computeStationaryDistribution transform (S fuel) initial =
+  let nextState = applyPushforward transform initial
+  in computeStationaryDistribution transform fuel nextState
 
 ||| Classifies whether a transform T: a -> b is a Unitary Isomorphism (η = I_a and ε = I_b).
 public export
