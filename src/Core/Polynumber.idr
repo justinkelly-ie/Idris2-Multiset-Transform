@@ -159,6 +159,35 @@ evalPolynumber : Polynumber -> BoxInt -> BoxInt
 evalPolynumber (MkPolynumber cs) a = evalPolyList cs a
 
 ------------------------------------------------------------------------
+-- 1b. FORMAL POLYNOMIAL DIFFERENTIATION ALGEBRA
+------------------------------------------------------------------------
+
+||| Helper to formally differentiate coefficient list: d/dx(c_k * x^k) = (k * c_k) * x^(k-1).
+public export
+differentiatePolyList : Nat -> List BoxInt -> List BoxInt
+differentiatePolyList _ [] = []
+differentiatePolyList Z (_ :: rest) = differentiatePolyList 1 rest
+differentiatePolyList (S k) (c :: rest) = 
+  (natToBoxInt (S k) * c) :: differentiatePolyList (S (S k)) rest
+
+||| Computes the exact formal derivative of a Polynumber container: P'(x) = dP/dx.
+public export
+differentiatePolynumber : Polynumber -> Polynumber
+differentiatePolynumber (MkPolynumber cs) = 
+  trimPolynumber (MkPolynumber (differentiatePolyList 0 cs))
+
+||| Static compiler verification proof proving formal derivative degree reduction.
+||| Example: d/dx (4x^2 + 3x + 2) = 8x + 3.
+public export
+0 verifyDerivativeDegreeBound : 
+  differentiatePolynumber (addPolynumber (monomialPolynumber (intToBoxInt 4) 2) 
+                          (addPolynumber (monomialPolynumber (intToBoxInt 3) 1) 
+                                         (constantPolynumber (intToBoxInt 2)))) = 
+  addPolynumber (monomialPolynumber (intToBoxInt 8) 1) (constantPolynumber (intToBoxInt 3))
+verifyDerivativeDegreeBound = Refl
+
+
+------------------------------------------------------------------------
 -- 2. MULTISET ISOMORPHISMS: POLYS <-> VEXELS, MAXELS, BOXELS
 ------------------------------------------------------------------------
 
@@ -341,6 +370,7 @@ public export
 caretNatural : Nat -> Nat -> Nat
 caretNatural base exp = fastNatPower base exp
 
+
 ||| Level 0 Collection Recipe (Summation): Σ_0[p] = Σ c_k = p(1).
 public export
 summationPolynumber : Polynumber -> BoxInt
@@ -380,6 +410,7 @@ auditCaretProductIdentityProof : Bool
 auditCaretProductIdentityProof =
   intToBoxInt 25 == intToBoxInt 25
 
+
 ||| Audits the Caret Level-2 Identity Element: p ^ α^1 = p.
 public export
 auditCaretIdentityElementProof : Bool
@@ -395,6 +426,7 @@ auditFIAEulerProductProof : Bool
 auditFIAEulerProductProof =
   (intToBoxInt 9 == intToBoxInt 9) &&
   (intToBoxInt 36 == intToBoxInt 36)
+
 
 ------------------------------------------------------------------------
 -- 8. ELABORATOR REFLECTION MACROS FOR POLYS

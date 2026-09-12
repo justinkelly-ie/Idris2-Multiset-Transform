@@ -35,6 +35,8 @@ natEq Z Z = True
 natEq (S k) (S j) = natEq k j
 natEq _ _ = False
 
+
+
 ||| Exact structural less-than-or-equal comparison for Nat reducing at compile time.
 public export
 natLTE : Nat -> Nat -> Bool
@@ -69,18 +71,6 @@ Neg BoxInt where
   negate (MkBoxInt a) = MkBoxInt (-a)
   (-) (MkBoxInt a) (MkBoxInt b) = MkBoxInt (a - b)
 
-public export
-Eq BoxInt where
-  (MkBoxInt a) == (MkBoxInt b) = a == b
-
-public export
-Ord BoxInt where
-  compare (MkBoxInt a) (MkBoxInt b) = compare a b
-
-public export
-Show BoxInt where
-  show (MkBoxInt a) = "[" ++ show a ++ "]"
-
 ||| Converts a BoxInt absolute value to Nat without typeclass dispatch.
 public export
 boxToNat : BoxInt -> Nat
@@ -94,6 +84,21 @@ public export
 absBox : BoxInt -> BoxInt
 absBox (MkBoxInt v) =
   MkBoxInt (natToInteger (boxToNat (MkBoxInt v)))
+
+public export
+Eq BoxInt where
+  (MkBoxInt a) == (MkBoxInt b) = a == b
+
+
+
+
+public export
+Ord BoxInt where
+  compare (MkBoxInt a) (MkBoxInt b) = compare a b
+
+public export
+Show BoxInt where
+  show (MkBoxInt a) = "[" ++ show a ++ "]"
 
 ------------------------------------------------------------------------
 -- FAST O(log k) BINARY EXPONENTIATION UTILITIES
@@ -144,6 +149,7 @@ fastNatPowerFuel (S fuel) base exp =
 public export
 fastNatPower : Nat -> Nat -> Nat
 fastNatPower base exp = fastNatPowerFuel (exp + 5) base exp
+
 
 public export
 div : BoxInt -> BoxInt -> BoxInt

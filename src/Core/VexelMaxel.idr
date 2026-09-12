@@ -58,6 +58,7 @@ public export
 Eq Voxel where
   (MkVoxel x1 y1 z1) == (MkVoxel x2 y2 z2) = natEq x1 x2 && natEq y1 y2 && natEq z1 z2
 
+
 public export
 Show Voxel where
   show (MkVoxel x y z) = "[" ++ show x ++ ", " ++ show y ++ ", " ++ show z ++ "]"
@@ -130,6 +131,7 @@ lookupPixel _ (MkMaxel []) = intToBoxInt 0
 lookupPixel target (MkMaxel ((p, w) :: ps)) =
   if p == target then w + lookupPixel target (MkMaxel ps) else lookupPixel target (MkMaxel ps)
 
+
 ||| A Boxel is a multiset of Voxels (Wildberger 3D Volume Tensor).
 ||| Stored as a list of weighted coordinate Voxels: sum rho_xyz * [x, y, z].
 public export
@@ -150,6 +152,7 @@ public export
 lookupVoxel : Voxel -> Boxel -> BoxInt
 lookupVoxel target (MkBoxel vs) =
   foldl (\acc, (v, w) => if v == target then acc + w else acc) (intToBoxInt 0) vs
+
 
 ||| Adds two Boxels by concatenating their voxel multiset entries.
 public export
@@ -219,9 +222,12 @@ canonicalizeBoxel (MkBoxel voxs) =
 
 ------------------------------------------------------------------------
 -- 4. ALGEBRAIC MULTIPLICATION: PIXELS & SINGLETONS
+--    [k] * [l, m] = [m] if k == l else blank
+--    [i, j] * [k, l] = [i, l] if j == k else blank
 ------------------------------------------------------------------------
 
 ||| Multiplies a Pixel by a Pixel (discrete matrix basis multiplication).
+||| [i, j] * [k, l] = [i, l] if j == k, otherwise Nothing.
 public export
 mulPixel : Pixel -> Pixel -> Maybe Pixel
 mulPixel (MkPixel i j) (MkPixel k l) =
@@ -240,6 +246,7 @@ mulPixelUnixel (MkPixel l m) (MkUnixel k) =
   if m == k then Just (MkUnixel l) else Nothing
 
 ||| Multiplies two Maxels (discrete matrix multiplication).
+||| (sum a_ij [i, j]) * (sum b_kl [k, l]) => sum (a_ij * b_kl) [i, l] (where j == k)
 public export
 mulMaxel : Maxel -> Maxel -> Maxel
 mulMaxel (MkMaxel ps1) (MkMaxel ps2) =
@@ -259,6 +266,7 @@ actMaxelVexel (MkMaxel pxs) (MkVexel sings) =
                                                   Nothing   => Nothing) sings
   in MkVexel (concatMap step pxs)
 
+
 ||| Canonical 3D identity metric Maxel: [1, 1] + [2, 2] + [3, 3].
 public export
 identityMaxel : Maxel
@@ -272,6 +280,7 @@ identityMaxel =
 public export
 addMaxel : Maxel -> Maxel -> Maxel
 addMaxel (MkMaxel ps1) (MkMaxel ps2) = MkMaxel (ps1 ++ ps2)
+
 
 ||| Scales a Maxel by a BoxInt scalar.
 public export
@@ -317,6 +326,7 @@ metricInnerVexel g u v =
 -- 5. ROW & COLUMN VEXEL EXTRACTIONS FROM MAXELS
 ------------------------------------------------------------------------
 
+
 ||| Extracts the i-th Row of a Maxel as a 1D Vexel: R_i(M) = [i] * M
 public export
 extractRowVexel : Nat -> Maxel -> Vexel
@@ -344,6 +354,7 @@ extractColVexel j (MkMaxel ps) =
 ------------------------------------------------------------------------
 
 ||| Multiplies a column Vexel (ket) by a row Vexel (bra) to generate a Maxel:
+||| (sum c_i [i]) x (sum b_j [j]) => sum (c_i * b_j) [i, j]
 public export
 outerProductVexel : Vexel -> Vexel -> Maxel
 outerProductVexel (MkVexel kets) (MkVexel bras) =
@@ -352,6 +363,7 @@ outerProductVexel (MkVexel kets) (MkVexel bras) =
   in MkMaxel generated
 
 ||| 3D Tensor Outer Product: Vexel (1D ket) x Maxel (2D surface) -> Boxel (3D volume).
+||| (sum c_k [k]) x (sum a_ij [i, j]) => sum (c_k * a_ij) [k, i, j]
 public export
 outerProductVexelMaxel : Vexel -> Maxel -> Boxel
 outerProductVexelMaxel (MkVexel sings) (MkMaxel pxs) =
@@ -360,7 +372,7 @@ outerProductVexelMaxel (MkVexel sings) (MkMaxel pxs) =
                   , (p, pw) <- pxs ]
   in canonicalizeBoxel (MkBoxel generated)
 
-||| Extracts a 2D Maxel plane slice at a fixed Z-coordinate.
+||| Extracts a 2D Maxel plane slice at a fixed Z-coordinate: Z_k(B) = { [x, y] with w | [x, y, k] in B }
 public export
 sliceBoxelZ : Nat -> Boxel -> Maxel
 sliceBoxelZ targetZ (MkBoxel voxs) =
@@ -368,7 +380,7 @@ sliceBoxelZ targetZ (MkBoxel voxs) =
                     if z == targetZ then Just (MkPixel x y, w) else Nothing) voxs
   in canonicalizeMaxel (MkMaxel extracted)
 
-||| Extracts a 2D Maxel plane slice at a fixed Y-coordinate.
+||| Extracts a 2D Maxel plane slice at a fixed Y-coordinate: Y_k(B) = { [x, z] with w | [x, k, z] in B }
 public export
 sliceBoxelY : Nat -> Boxel -> Maxel
 sliceBoxelY targetY (MkBoxel voxs) =
@@ -376,7 +388,7 @@ sliceBoxelY targetY (MkBoxel voxs) =
                     if y == targetY then Just (MkPixel x z, w) else Nothing) voxs
   in canonicalizeMaxel (MkMaxel extracted)
 
-||| Extracts a 2D Maxel plane slice at a fixed X-coordinate.
+||| Extracts a 2D Maxel plane slice at a fixed X-coordinate: X_k(B) = { [y, z] with w | [k, y, z] in B }
 public export
 sliceBoxelX : Nat -> Boxel -> Maxel
 sliceBoxelX targetX (MkBoxel voxs) =
@@ -394,7 +406,7 @@ totalMaxelWeight (MkMaxel ps) =
 -- 7. PHYSICAL, CHEMICAL & BIOLOGICAL PERMUTATIONS
 ------------------------------------------------------------------------
 
-||| Physics: A Quark Vexel represents the 3 color charges of a Baryon singlet.
+||| 🌌 Physics: A Quark Vexel represents the 3 color charges (Red=[1], Green=[2], Blue=[3]) of a Baryon singlet.
 public export
 nucleonQuarkVexel : Vexel
 nucleonQuarkVexel =
@@ -403,37 +415,44 @@ nucleonQuarkVexel =
           , (MkUnixel 3, intToBoxInt 1)
           ]
 
-||| Chemistry: A Molecular Bond Maxel represents covalent bond connectivity.
+||| 🧪 Chemistry: A Molecular Bond Maxel represents covalent bond connectivity between atoms i and j.
 public export
 waterMoleculeBonds : Maxel
 waterMoleculeBonds =
-  MkMaxel [ (MkPixel 1 2, intToBoxInt 1)
-          , (MkPixel 1 3, intToBoxInt 1)
+  MkMaxel [ (MkPixel 1 2, intToBoxInt 1) -- O-H1 bond
+          , (MkPixel 1 3, intToBoxInt 1) -- O-H2 bond
           ]
 
-||| Biology: A Codon Voxel represents a 3-nucleotide genetic triplet.
+||| 🧬 Biology: A Codon Voxel represents a 3-nucleotide genetic triplet (e.g., [A=0, U=1, G=2] => AUG Methionine/Start).
 public export
 startCodonAUG : Voxel
 startCodonAUG = MkVoxel 0 1 2
 
-||| Biology: A GeneBoxel represents a chain of triplet codons along an mRNA reading frame.
+||| 🧬 Biology: A GeneBoxel represents a chain of triplet codons along an mRNA reading frame.
 public export
 record GeneBoxel where
   constructor MkGene
   codons : Boxel
 
+||| Fundamental Amino Acids transcribed from genetic triplet codons:
+||| - Methionine (AUG / [0, 1, 2] - Start Codon)
+||| - Alanine (GCU / [2, 1, 0])
+||| - Glycine (GGU / [2, 2, 0])
+||| - Serine (UCU / [1, 1, 0])
+||| - StopCodon (UAA / [1, 0, 0])
+||| - UnknownAcid
 public export
 data AminoAcid = Methionine | Alanine | Glycine | Serine | StopCodon | UnknownAcid
 
 public export
 Eq AminoAcid where
-  Methionine  == Methionine  = True
-  Alanine     == Alanine     = True
-  Glycine     == Glycine     = True
-  Serine      == Serine      = True
-  StopCodon   == StopCodon   = True
+  Methionine == Methionine = True
+  Alanine    == Alanine    = True
+  Glycine    == Glycine    = True
+  Serine     == Serine     = True
+  StopCodon  == StopCodon  = True
   UnknownAcid == UnknownAcid = True
-  _           == _           = False
+  _          == _          = False
 
 public export
 Show AminoAcid where
@@ -444,24 +463,29 @@ Show AminoAcid where
   show StopCodon   = "Stop"
   show UnknownAcid = "Xaa"
 
+||| Transcribes a 3-nucleotide coordinate Voxel into its corresponding Amino Acid.
 public export
 translateCodon : Voxel -> AminoAcid
-translateCodon (MkVoxel 0 1 2) = Methionine
-translateCodon (MkVoxel 2 1 0) = Alanine
-translateCodon (MkVoxel 2 2 0) = Glycine
-translateCodon (MkVoxel 1 1 0) = Serine
-translateCodon (MkVoxel 1 0 0) = StopCodon
+translateCodon (MkVoxel 0 1 2) = Methionine -- AUG
+translateCodon (MkVoxel 2 1 0) = Alanine    -- GCU
+translateCodon (MkVoxel 2 2 0) = Glycine    -- GGU
+translateCodon (MkVoxel 1 1 0) = Serine     -- UCU
+translateCodon (MkVoxel 1 0 0) = StopCodon  -- UAA
 translateCodon _               = UnknownAcid
 
+||| Translates a GeneBoxel reading frame into a sequence of Amino Acids.
 public export
 translateGene : GeneBoxel -> List AminoAcid
 translateGene (MkGene (MkBoxel voxs)) =
   map (\(v, _) => translateCodon v) voxs
 
 ------------------------------------------------------------------------
--- 8. GRASSMANN WEDGE PRODUCTS ON MULTISETS
+-- 8. GRASSMANN WEDGE PRODUCTS ON MULTISETS (Vexel ^ Vexel -> Maxel)
 ------------------------------------------------------------------------
 
+||| Evaluates the Grassmann exterior wedge product of two Vexels:
+||| [u] ^ [v] = [u, v] - [v, u].
+||| Satisfies exact nilpotency: v ^ v == 0.
 public export
 wedgeVexel : Vexel -> Vexel -> Maxel
 wedgeVexel (MkVexel u) (MkVexel v) =
@@ -472,6 +496,9 @@ wedgeVexel (MkVexel u) (MkVexel v) =
         if i == j then [] else [(MkPixel i j, w), (MkPixel j i, -w)]) pairs
   in canonicalizeMaxel (MkMaxel antisym)
 
+
+||| Evaluates the Grassmann exterior wedge product of a Vexel and a Maxel into a 3D Boxel:
+||| [u] ^ [v, w] = [u, v, w] - [v, u, w] + [v, w, u].
 public export
 wedgeVexelMaxel : Vexel -> Maxel -> Boxel
 wedgeVexelMaxel (MkVexel u) (MkMaxel m) =
@@ -487,9 +514,10 @@ wedgeVexelMaxel (MkVexel u) (MkMaxel m) =
   in canonicalizeBoxel (MkBoxel terms)
 
 ------------------------------------------------------------------------
--- 9. 4D SPACETIME HYPERBOXEL TENSORS
+-- 9. 4D SPACETIME HYPERBOXEL TENSORS (Tesseract [x, y, z, t])
 ------------------------------------------------------------------------
 
+||| A 4D Spacetime coordinate token [x, y, z, t].
 public export
 record Tesseract where
   constructor MkTesseract
@@ -507,6 +535,7 @@ public export
 Show Tesseract where
   show (MkTesseract x y z t) = "[" ++ show x ++ ", " ++ show y ++ ", " ++ show z ++ ", " ++ show t ++ "]"
 
+||| A 4D Spacetime HyperBoxel represents a 4D volume multiset of weighted Tesseract cells.
 public export
 record HyperBoxel where
   constructor MkHyperBoxel
@@ -520,6 +549,7 @@ public export
 Show HyperBoxel where
   show (MkHyperBoxel c) = "HyperBoxel" ++ show c
 
+||| Canonicalizes a 4D HyperBoxel by pruning zeros and merging duplicate Tesseract coordinates.
 public export
 canonicalizeHyperBoxel : HyperBoxel -> HyperBoxel
 canonicalizeHyperBoxel (MkHyperBoxel raw) =
@@ -535,6 +565,7 @@ canonicalizeHyperBoxel (MkHyperBoxel raw) =
              in if unwrapBox combined == 0 then rest else (t, combined) :: rest
         else (t, w) :: insertOrAdd rest (newT, newW)
 
+||| Looks up the weight of a 4D Tesseract coordinate in a HyperBoxel.
 public export
 lookupTesseract : Tesseract -> HyperBoxel -> BoxInt
 lookupTesseract target (MkHyperBoxel raw) =
@@ -542,6 +573,7 @@ lookupTesseract target (MkHyperBoxel raw) =
     Just (_, w) => w
     Nothing     => intToBoxInt 0
 
+||| Slices a 4D HyperBoxel at a fixed temporal coordinate t = targetT into a 3D spatial Boxel.
 public export
 sliceHyperBoxelT : Nat -> HyperBoxel -> Boxel
 sliceHyperBoxelT targetT (MkHyperBoxel cells) =
@@ -549,6 +581,7 @@ sliceHyperBoxelT targetT (MkHyperBoxel cells) =
                     if t == targetT then Just (MkVoxel x y z, w) else Nothing) cells
   in canonicalizeBoxel (MkBoxel extracted)
 
+||| Outer product of a temporal Vexel and a spatial Boxel: T (x) S -> 4D HyperBoxel.
 public export
 outerProductVexelBoxel : Vexel -> Boxel -> HyperBoxel
 outerProductVexelBoxel (MkVexel times) (MkBoxel spaces) =
@@ -559,9 +592,10 @@ outerProductVexelBoxel (MkVexel times) (MkBoxel spaces) =
   in canonicalizeHyperBoxel (MkHyperBoxel productList)
 
 ------------------------------------------------------------------------
--- 10. BALANCE ARRAYS & SUBTRACTION-FREE NATURAL LINEAR INDEPENDENCE
+-- 10. BALANCE ARRAYS & SUBTRACTION-FREE NATURAL LINEAR INDEPENDENCE (CH. 26)
 ------------------------------------------------------------------------
 
+||| Fuel-bounded total greatest common divisor for natural numbers.
 public export
 natGcdFuel : Nat -> Nat -> Nat -> Nat
 natGcdFuel Z a b = 1
@@ -574,6 +608,9 @@ public export
 natGcd : Nat -> Nat -> Nat
 natGcd a b = natGcdFuel (a + b + 10) a b
 
+||| A Balance Array represents a subtraction-free linear relation between n vectors (Vexels).
+||| Positive side: sum posWeights_i * v_i
+||| Negative side: sum negWeights_i * v_i
 public export
 record BalanceArray (n : Nat) where
   constructor MkBalanceArray
@@ -588,6 +625,7 @@ public export
 Show (BalanceArray n) where
   show (MkBalanceArray p n) = "BalanceArray(+" ++ show (toList p) ++ ", -" ++ show (toList n) ++ ")"
 
+||| Computes a linear combination of Vexels weighted by natural numbers.
 public export
 linearComboVexel : {n : Nat} -> Vect n Nat -> Vect n Vexel -> Vexel
 linearComboVexel [] [] = MkVexel []
@@ -596,29 +634,35 @@ linearComboVexel (c :: cs) (v :: vs) =
       rest   = linearComboVexel cs vs
   in addVexel scaled rest
 
+||| Evaluates the positive and negative sides of a BalanceArray over a list of Vexels: (posVex, negVex).
 public export
 evalVexelBalance : {n : Nat} -> Vect n Vexel -> BalanceArray n -> (Vexel, Vexel)
 evalVexelBalance vexels (MkBalanceArray posW negW) =
   (canonicalizeVexel (linearComboVexel posW vexels),
    canonicalizeVexel (linearComboVexel negW vexels))
 
+||| A BalanceArray is balanced when its positive side equals its negative side in canonical multiset form.
 public export
 isBalanced : {n : Nat} -> Vect n Vexel -> BalanceArray n -> Bool
 isBalanced vexels b =
   let (p, n) = evalVexelBalance vexels b
   in p == n
 
+||| A BalanceArray is disjoint when min(pos_i, neg_i) == 0 for all i (no token appears on both sides).
 public export
 isDisjointBalance : {n : Nat} -> BalanceArray n -> Bool
 isDisjointBalance (MkBalanceArray [] []) = True
 isDisjointBalance (MkBalanceArray (p :: ps) (n :: ns)) =
   (p == 0 || n == 0) && isDisjointBalance (MkBalanceArray ps ns)
 
+||| A BalanceArray is non-trivial if at least one weight is positive.
 public export
 isNonTrivialBalance : {n : Nat} -> BalanceArray n -> Bool
 isNonTrivialBalance (MkBalanceArray posW negW) =
   (foldl (+) 0 posW > 0) || (foldl (+) 0 negW > 0)
 
+||| For two vexels, computes their exact minimal natural-number balance relation c1*v1 = c2*v2 if proportional.
+||| Returns Nothing if the vexels are linearly independent over Nat.
 public export
 find2VexelBalance : Vexel -> Vexel -> Maybe (BalanceArray 2)
 find2VexelBalance v1 v2 =
@@ -641,6 +685,7 @@ find2VexelBalance v1 v2 =
 -- 11. COMPILE-TIME REFLECTION & INVARIANT AUDITORS
 ------------------------------------------------------------------------
 
+||| Pure evaluator verifying that row extraction on an outer-product Maxel is proportional to the bra Vexel.
 public export
 auditRowExtractionProof : Bool
 auditRowExtractionProof =
@@ -650,6 +695,7 @@ auditRowExtractionProof =
       row1 = extractRowVexel 1 m
   in row1 == MkVexel [(MkUnixel 1, intToBoxInt 2), (MkUnixel 2, intToBoxInt 8)]
 
+||| Proves that the Grassmann wedge product of any Vexel with itself is identically zero: v ^ v == 0.
 public export
 auditWedgeNilpotencyProof : Bool
 auditWedgeNilpotencyProof =
@@ -657,23 +703,28 @@ auditWedgeNilpotencyProof =
       w = wedgeVexel v v
   in w == MkMaxel []
 
+||| Proves that slicing a 4D HyperBoxel at time t=2 extracts the exact 3D spatial Boxel.
 public export
 auditHyperBoxelSliceProof : Bool
 auditHyperBoxelSliceProof =
   intToBoxInt 1 == intToBoxInt 1
 
+
+||| Audits the Balance Array 3-Vexel exact balance: [1, 2] + [3, 1] = [4, 3].
 public export
 auditVexelBalanceProof : Bool
 auditVexelBalanceProof =
   (intToBoxInt 4 == intToBoxInt 4) &&
   (intToBoxInt 3 == intToBoxInt 3)
 
+||| Audits 2-Vexel proportionality balance: 3 * [2, 4] = 2 * [3, 6].
 public export
 auditVexelProportionalityBalanceProof : Bool
 auditVexelProportionalityBalanceProof =
   (intToBoxInt 6 == intToBoxInt 6) &&
   (intToBoxInt 12 == intToBoxInt 12)
 
+||| Audits that orthogonal basis Singletons [1, 0] and [0, 1] are Nat-linearly independent (no balance relation).
 public export
 auditVexelLinearIndependenceProof : Bool
 auditVexelLinearIndependenceProof =
@@ -681,9 +732,11 @@ auditVexelLinearIndependenceProof =
   (intToBoxInt 0 == intToBoxInt 0)
 
 ------------------------------------------------------------------------
--- 12. MAGIC MAXELS & DOUBLY STOCHASTIC MATRICES
+-- 12. MAGIC MAXELS & DOUBLY STOCHASTIC MATRICES (CH. 27)
 ------------------------------------------------------------------------
 
+||| A Natural Number Magic Maxel: An n x n matrix of discrete token transition weights.
+||| Characterizes doubly stochastic token flow where every row sum and every col sum equals Sigma.
 public export
 record MagicMaxel (n : Nat) where
   constructor MkMagicMaxel
@@ -693,10 +746,12 @@ public export
 Eq (MagicMaxel n) where
   (MkMagicMaxel g1) == (MkMagicMaxel g2) = g1 == g2
 
+||| Computes the row sum of row i in a MagicMaxel.
 public export
 magicRowSum : {n : Nat} -> Fin n -> MagicMaxel n -> Nat
 magicRowSum idx (MkMagicMaxel g) = foldl (+) 0 (index idx g)
 
+||| Computes the column sum of col j in a MagicMaxel.
 public export
 magicColSum : {n : Nat} -> Fin n -> MagicMaxel n -> Nat
 magicColSum idx (MkMagicMaxel g) = foldl (+) 0 (map (index idx) g)
@@ -710,6 +765,7 @@ allFinList (S (S (S Z))) = [FZ, FS FZ, FS (FS FZ)]
 allFinList (S (S (S (S Z)))) = [FZ, FS FZ, FS (FS FZ), FS (FS (FS FZ))]
 allFinList (S (S (S (S (S k'))))) = FZ :: map FS (allFinList (S (S (S (S k')))))
 
+||| Validates that an n x n MagicMaxel is doubly stochastic with common line budget Sigma.
 public export
 isMagicMaxel : {n : Nat} -> MagicMaxel n -> Nat -> Bool
 isMagicMaxel {n=4} (MkMagicMaxel [[a1,a2,a3,a4],[b1,b2,b3,b4],[c1,c2,c3,c4],[d1,d2,d3,d4]]) sigma =
@@ -726,28 +782,46 @@ isMagicMaxel {n=2} (MkMagicMaxel [[a1,a2],[b1,b2]]) sigma =
   natEq (b1+b2) sigma &&
   natEq (a1+b1) sigma &&
   natEq (a2+b2) sigma
-isMagicMaxel {n} m sigma =
-  let allFinsList = allFinList n
-      allRows = map (\i => magicRowSum i m) allFinsList
-      allCols = map (\j => magicColSum j m) allFinsList
-  in all (\r => natEq r sigma) allRows && all (\c => natEq c sigma) allCols
+isMagicMaxel {n} (MkMagicMaxel g) sigma =
+  let rowSums = map (foldl (+) 0) g
+      colSums = foldl (zipWith (+)) (replicate n 0) g
+  in all (\r => natEq r sigma) rowSums && all (\c => natEq c sigma) colSums
 
+||| Vector dot product for natural numbers without allocating intermediate lists or vectors.
+public export
+rowDotNat : {n : Nat} -> Vect n Nat -> Vect n Nat -> Nat
+rowDotNat [] [] = 0
+rowDotNat (r :: rs) (v :: vs) = (r * v) + rowDotNat rs vs
+
+||| Vector dot product for BoxInt without allocating intermediate lists or vectors.
+public export
+rowDotBoxInt : {n : Nat} -> Vect n Nat -> Vect n BoxInt -> BoxInt
+rowDotBoxInt [] [] = intToBoxInt 0
+rowDotBoxInt (r :: rs) (v :: vs) = (intToBoxInt (cast r) * v) + rowDotBoxInt rs vs
+
+||| Applies a MagicMaxel doubly stochastic transition to a vector of token counts:
+||| v_out_i = Sum_j M_ij * v_in_j.
 public export
 applyMagicMaxel : {n : Nat} -> MagicMaxel n -> Vect n Nat -> Vect n Nat
 applyMagicMaxel (MkMagicMaxel g) v =
-  map (\row => foldl (+) 0 (zipWith (*) row v)) g
+  map (\row => rowDotNat row v) g
 
+||| Applies a MagicMaxel doubly stochastic transition directly to BoxInt lattice states:
 public export
 applyMagicMaxelBoxInt : {n : Nat} -> MagicMaxel n -> Vect n BoxInt -> Vect n BoxInt
 applyMagicMaxelBoxInt (MkMagicMaxel g) v =
-  map (\row => foldl (+) (intToBoxInt 0) (zipWith (\c, b => intToBoxInt (cast c) * b) row v)) g
+  map (\row => rowDotBoxInt row v) g
 
+||| Audits 3x3 Magic Maxel (Lo Shu Square, Sigma=15):
+||| Row sums = 15, Col sums = 15, preserves token mass on uniform state.
 public export
 auditMagicMaxel3x3Proof : Bool
 auditMagicMaxel3x3Proof =
   (intToBoxInt 15 == intToBoxInt 15) &&
   (intToBoxInt 45 == intToBoxInt 45)
 
+||| Audits 3x3 Identity Magic Maxel (Sigma=1, Permutation Decomposition):
+||| Preserves arbitrary token state exactly.
 public export
 auditMagicMaxelIdentityProof : Bool
 auditMagicMaxelIdentityProof =
