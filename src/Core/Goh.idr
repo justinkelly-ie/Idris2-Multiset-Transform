@@ -51,3 +51,19 @@ countFactors : GohMultiset -> Nat
 countFactors EmptyBag = 0
 countFactors (AddFactor _ rest) = S (countFactors rest)
 
+||| Checks if a GohAuxiliary factor has all zero coefficients.
+public export
+isZeroAuxiliary : GohAuxiliary degree -> Bool
+isZeroAuxiliary (Phi coeffs) = all (\c => rationalEquiv c zeroUnixelFraction) coeffs
+
+||| Aggregates and canonicalizes a GohMultiset by pruning zero-coefficient auxiliary factors.
+public export
+canonicalizeGohMultiset : GohMultiset -> GohMultiset
+canonicalizeGohMultiset EmptyBag = EmptyBag
+canonicalizeGohMultiset (AddFactor factor rest) =
+  let restCan = canonicalizeGohMultiset rest
+  in if isZeroAuxiliary factor
+        then restCan
+        else AddFactor factor restCan
+
+

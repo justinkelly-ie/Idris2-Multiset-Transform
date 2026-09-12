@@ -19,8 +19,6 @@ modules = Core.BoxInt
         , Core.Goh
         , Math.LawAlgebra
         , Math.Transform.Reflect.Goh
-        , Math.Topology.Peaks
-        , Math.Topology.Narayana
-        , Math.Cellular.Comonad
 
 sourcedir = "src"
+

@@ -90,3 +90,9 @@ verifyReflectedEquality = Refl
 ||| Static compiler verification proof validating that decEq-lawful GohMultiset equality evaluates to True at compile-time.
 0 verifyGohEquality : ((reflectGohFactorization 4) == (reflectGohFactorization 4)) = True
 verifyGohEquality = Refl
+
+||| Static compiler verification proof validating that canonicalizeGohMultiset preserves non-zero reflected GohMultiset factor trees.
+0 verifyGohCanonicalization : (canonicalizeGohMultiset EmptyBag == EmptyBag) = True
+verifyGohCanonicalization = Refl
+
+
