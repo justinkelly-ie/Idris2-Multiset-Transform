@@ -1,13 +1,12 @@
 module Core.UniverseState
 
-import Core.BoxInt
-import Core.Multiset
-import Core.VexelMaxel
 import Data.Vect
+import Core.BoxInt
+import Core.VexelMaxel
 
 %default total
 
-||| The completely un-hardcoded cosmic partition state.
+||| Bounded 3-pool discrete multiset state representation.
 ||| Dimensions are tracked relationally through dependent parameters.
 ||| All data slots store exact BoxInt discrete particle/quadrance tokens.
 public export
@@ -17,7 +16,7 @@ record UniverseState (vmSize : Nat) (deSize : Nat) (dmSize : Nat) where
   darkEnergy    : Vect deSize BoxInt -- Background ROM capacity
   darkMatter    : Vect dmSize BoxInt -- Historical error/residue ledger
 
-||| Extracts the Dark Matter log as a read-only reference.
+||| Extracts the residue log as a read-only reference.
 public export
 dmLog : UniverseState vm de dm -> Vect dm BoxInt
 dmLog (MkUniverseState _ _ dmData) = dmData
@@ -38,8 +37,7 @@ linearVectCombine : Vect n a -> Vect m a -> Vect (n + m) a
 linearVectCombine [] ys = ys
 linearVectCombine (x :: xs) ys = x :: linearVectCombine xs ys
 
-||| Strict QTT linear multiplicity state transition:
-||| Consumes the current UniverseState and appends new matter tokens without resource leakage.
+||| Strict QTT linear multiplicity state transition.
 public export
 stepUniverseLinear : {vm, de, dm, k : Nat} ->
                      (1 state : UniverseState vm de dm) ->
@@ -51,12 +49,10 @@ stepUniverseLinear (MkUniverseState vm de dm) newMatter =
   in MkUniverseState updatedVM de updatedDM
 
 ------------------------------------------------------------------------
--- UNIFIED COSMIC DIRECT-SUM MULTISET
+-- UNIFIED DIRECT-SUM MULTISET
 ------------------------------------------------------------------------
 
-||| The Unified Cosmic Multiset:
-||| Encodes Visible Matter as a 3D Boxel (27 cells), Dark Energy as a 2D Maxel (128 cells),
-||| and Dark Matter as an inductive 1D Vexel of historical singletons.
+||| Bounded direct-sum multiset encoding 3D Boxel, 2D Maxel, and 1D Vexel.
 public export
 record CosmicMultiset where
   constructor MkCosmicMultiset
@@ -64,13 +60,13 @@ record CosmicMultiset where
   darkEnergy : Maxel
   darkMatter : Vexel
 
-||| Calculates total active state energy across the cosmic multiset.
+||| Calculates total active budget across the direct-sum multiset.
 public export
 totalCosmicMultisetBudget : CosmicMultiset -> Nat
 totalCosmicMultisetBudget (MkCosmicMultiset (MkBoxel v) (MkMaxel de) (MkVexel dm)) =
   length v + length de + length dm
 
-||| Embeds a dependent UniverseState into the Unified Cosmic Multiset.
+||| Embeds a UniverseState into the CosmicMultiset.
 public export
 stateToCosmicMultiset : {vm, de, dm : Nat} -> UniverseState vm de dm -> CosmicMultiset
 stateToCosmicMultiset (MkUniverseState vmVect deVect dmVect) =
@@ -79,7 +75,7 @@ stateToCosmicMultiset (MkUniverseState vmVect deVect dmVect) =
       dmTerms = toList (tabulate (\idx => (MkUnixel (finToNat idx + 1), index idx dmVect)))
   in MkCosmicMultiset (canonicalizeBoxel (MkBoxel vmTerms)) (canonicalizeMaxel (MkMaxel deTerms)) (canonicalizeVexel (MkVexel dmTerms))
 
-||| Audits that Epoch 37 CosmicMultiset has total budget 210 = 27 + 128 + 55.
+||| Audits total state budget for 210 = 27 + 128 + 55.
 public export
 auditCosmicMultisetBudgetProof : Bool
 auditCosmicMultisetBudgetProof =

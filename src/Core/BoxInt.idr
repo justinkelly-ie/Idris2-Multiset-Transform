@@ -1,6 +1,7 @@
 module Core.BoxInt
 
 import Data.Nat
+import public Core.Order.Preorder
 
 %default total
 
@@ -34,15 +35,6 @@ natEq : Nat -> Nat -> Bool
 natEq Z Z = True
 natEq (S k) (S j) = natEq k j
 natEq _ _ = False
-
-
-
-||| Exact structural less-than-or-equal comparison for Nat reducing at compile time.
-public export
-natLTE : Nat -> Nat -> Bool
-natLTE Z _ = True
-natLTE (S k) Z = False
-natLTE (S k) (S j) = natLTE k j
 
 public export
 addBox : BoxInt -> BoxInt -> BoxInt
