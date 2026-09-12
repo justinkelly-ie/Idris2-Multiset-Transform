@@ -16,6 +16,11 @@ modules = Core.BoxInt
         , Core.Interfaces.StatefulLaw
         , Core.LinearBuffer
         , Core.TransformMultiset
+        , Core.Goh
         , Math.LawAlgebra
+        , Math.Transform.Reflect.Goh
+        , Math.Topology.Peaks
+        , Math.Topology.Narayana
+        , Math.Cellular.Comonad
 
 sourcedir = "src"
