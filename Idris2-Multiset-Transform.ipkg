@@ -16,6 +16,7 @@ modules = Core.BoxInt
         , Core.Interfaces.StatefulLaw
         , Core.LinearBuffer
         , Core.TransformMultiset
+        , Core.ScalePipeline
         , Core.Goh
         , Math.LawAlgebra
         , Math.Transform.Reflect.Goh

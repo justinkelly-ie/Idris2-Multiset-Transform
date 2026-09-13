@@ -174,3 +174,20 @@ boxNegative (MkBoxInt a) =
   case integerToNat (-a) of
     Z => False
     S _ => True
+
+------------------------------------------------------------------------
+-- MONOMORPHIC 2D BOXINT MATRIX PRIMITIVES
+------------------------------------------------------------------------
+
+||| Direct monomorphic 2D matrix determinant: det([a b; c d]) = a*d - b*c
+%inline public export
+detBoxMatrix2D : BoxInt -> BoxInt -> BoxInt -> BoxInt -> BoxInt
+detBoxMatrix2D (MkBoxInt a) (MkBoxInt b) (MkBoxInt c) (MkBoxInt d) =
+  MkBoxInt (a * d - b * c)
+
+||| Direct monomorphic 2D symmetric matrix determinant: det([g11 g12; g12 g22]) = g11*g22 - g12^2
+%inline public export
+detSymmetricMatrix2D : BoxInt -> BoxInt -> BoxInt -> BoxInt
+detSymmetricMatrix2D (MkBoxInt g11) (MkBoxInt g12) (MkBoxInt g22) =
+  MkBoxInt (g11 * g22 - g12 * g12)
+
