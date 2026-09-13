@@ -4,7 +4,6 @@ import Core.BoxInt
 import Core.Multiset
 import Core.UnixelFraction
 import Core.TransformMultiset
-import Core.ScalePipeline
 
 %default total
 
@@ -47,26 +46,3 @@ composeScaleFunctors : {0 a, b, c : ScaleLevel} ->
 composeScaleFunctors (MkScaleFunctor f) (MkScaleFunctor g) =
   MkScaleFunctor (composeMaxels f g)
 
-------------------------------------------------------------------------
--- 2. LAYER 1 CANONICAL SCALE FUNCTORS
-------------------------------------------------------------------------
-
-public export
-sf1_QuarkToHadron : ScaleFunctor SubatomicLevel HadronLevel ColorCharge HadronToken
-sf1_QuarkToHadron = MkScaleFunctor t1_QuarkToHadron
-
-public export
-sf2_HadronToAtom : ScaleFunctor HadronLevel AtomLevel HadronToken AtomToken
-sf2_HadronToAtom = MkScaleFunctor t2_HadronToAtom
-
-public export
-sf3_AtomToMolecule : ScaleFunctor AtomLevel MoleculeLevel AtomToken MoleculeToken
-sf3_AtomToMolecule = MkScaleFunctor t3_AtomToMolecule
-
-public export
-sf4_MoleculeToBiomodule : ScaleFunctor MoleculeLevel CellLevel MoleculeToken BiomoduleToken
-sf4_MoleculeToBiomodule = MkScaleFunctor t4_MoleculeToBiomodule
-
-public export
-sfTotalFunctorialPipeline : ScaleFunctor SubatomicLevel CellLevel ColorCharge BiomoduleToken
-sfTotalFunctorialPipeline = composeScaleFunctors (composeScaleFunctors (composeScaleFunctors sf1_QuarkToHadron sf2_HadronToAtom) sf3_AtomToMolecule) sf4_MoleculeToBiomodule

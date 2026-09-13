@@ -4,6 +4,7 @@ import Core.BoxInt
 import Core.Multiset
 import Core.UnixelFraction
 import Core.TransformMultiset
+import Core.ScaleCategory
 import Data.List
 
 %default total
@@ -252,6 +253,35 @@ t123_QuarkToMolecule = composeMaxels t12_QuarkToAtom t3_AtomToMolecule
 public export
 tTotalFunctorialPipeline : MaxelTransform ColorCharge BiomoduleToken
 tTotalFunctorialPipeline = composeMaxels t123_QuarkToMolecule t4_MoleculeToBiomodule
+
+------------------------------------------------------------------------
+-- 7b. TYPE-SAFE SCALE FUNCTOR REPRESENTATIONS
+------------------------------------------------------------------------
+
+||| Type-level ScaleFunctor stage 1: Subatomic -> Hadron
+public export
+sf1_QuarkToHadron : ScaleFunctor SubatomicLevel HadronLevel ColorCharge HadronToken
+sf1_QuarkToHadron = MkScaleFunctor t1_QuarkToHadron
+
+||| Type-level ScaleFunctor stage 2: Hadron -> Atom
+public export
+sf2_HadronToAtom : ScaleFunctor HadronLevel AtomLevel HadronToken AtomToken
+sf2_HadronToAtom = MkScaleFunctor t2_HadronToAtom
+
+||| Type-level ScaleFunctor stage 3: Atom -> Molecule
+public export
+sf3_AtomToMolecule : ScaleFunctor AtomLevel MoleculeLevel AtomToken MoleculeToken
+sf3_AtomToMolecule = MkScaleFunctor t3_AtomToMolecule
+
+||| Type-level ScaleFunctor stage 4: Molecule -> Cell
+public export
+sf4_MoleculeToBiomodule : ScaleFunctor MoleculeLevel CellLevel MoleculeToken BiomoduleToken
+sf4_MoleculeToBiomodule = MkScaleFunctor t4_MoleculeToBiomodule
+
+||| End-to-End Type-Safe ScaleFunctor Pipeline: Subatomic -> Cell
+public export
+sfTotalFunctorialPipeline : ScaleFunctor SubatomicLevel CellLevel ColorCharge BiomoduleToken
+sfTotalFunctorialPipeline = composeScaleFunctors (composeScaleFunctors (composeScaleFunctors sf1_QuarkToHadron sf2_HadronToAtom) sf3_AtomToMolecule) sf4_MoleculeToBiomodule
 
 ------------------------------------------------------------------------
 -- 8. PIPELINE APPLICATION OPERATOR & INVARIANT AUDIT
