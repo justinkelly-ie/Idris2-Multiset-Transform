@@ -1,7 +1,7 @@
 module Core.BoxInt
 
 import Data.Nat
-import public Core.Order.Preorder
+import Core.Order.Preorder
 
 %default total
 
@@ -17,7 +17,7 @@ public export
 unwrapBox : BoxInt -> Integer
 unwrapBox (MkBoxInt v) = v
 
-public export
+%inline public export
 intToBoxInt : Integer -> BoxInt
 intToBoxInt n = MkBoxInt n
 
@@ -30,17 +30,17 @@ natToBoxInt : Nat -> BoxInt
 natToBoxInt n = MkBoxInt (natToInteger n)
 
 ||| Exact structural equality for Nat reducing at compile time.
-public export
+%inline public export
 natEq : Nat -> Nat -> Bool
 natEq Z Z = True
 natEq (S k) (S j) = natEq k j
 natEq _ _ = False
 
-public export
+%inline public export
 addBox : BoxInt -> BoxInt -> BoxInt
 addBox (MkBoxInt a) (MkBoxInt b) = MkBoxInt (a + b)
 
-public export
+%inline public export
 subBox : BoxInt -> BoxInt -> BoxInt
 subBox (MkBoxInt a) (MkBoxInt b) = MkBoxInt (a - b)
 
@@ -64,7 +64,7 @@ Neg BoxInt where
   (-) (MkBoxInt a) (MkBoxInt b) = MkBoxInt (a - b)
 
 ||| Converts a BoxInt absolute value to Nat without typeclass dispatch.
-public export
+%inline public export
 boxToNat : BoxInt -> Nat
 boxToNat (MkBoxInt v) =
   case integerToNat v of
@@ -72,7 +72,7 @@ boxToNat (MkBoxInt v) =
     S k => S k
 
 ||| Computes absolute value of a BoxInt natively without typeclass dispatch.
-public export
+%inline public export
 absBox : BoxInt -> BoxInt
 absBox (MkBoxInt v) =
   MkBoxInt (natToInteger (boxToNat (MkBoxInt v)))
