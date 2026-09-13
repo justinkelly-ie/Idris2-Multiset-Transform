@@ -17,6 +17,7 @@ modules = Core.BoxInt
         , Core.LinearBuffer
         , Core.TransformMultiset
         , Core.ScalePipeline
+        , Core.ScaleCategory
         , Core.Goh
         , Math.LawAlgebra
         , Math.Transform.Reflect.Goh

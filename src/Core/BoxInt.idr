@@ -191,3 +191,18 @@ detSymmetricMatrix2D : BoxInt -> BoxInt -> BoxInt -> BoxInt
 detSymmetricMatrix2D (MkBoxInt g11) (MkBoxInt g12) (MkBoxInt g22) =
   MkBoxInt (g11 * g22 - g12 * g12)
 
+||| Direct monomorphic 2D matrix multiplication: [a1 b1; c1 d1] * [a2 b2; c2 d2]
+%inline public export
+multBoxMatrix2D : (BoxInt, BoxInt, BoxInt, BoxInt) -> (BoxInt, BoxInt, BoxInt, BoxInt) -> (BoxInt, BoxInt, BoxInt, BoxInt)
+multBoxMatrix2D (MkBoxInt a1, MkBoxInt b1, MkBoxInt c1, MkBoxInt d1) (MkBoxInt a2, MkBoxInt b2, MkBoxInt c2, MkBoxInt d2) =
+  ( MkBoxInt (a1 * a2 + b1 * c2)
+  , MkBoxInt (a1 * b2 + b1 * d2)
+  , MkBoxInt (c1 * a2 + d1 * c2)
+  , MkBoxInt (c1 * b2 + d1 * d2)
+  )
+
+||| Direct monomorphic 2D matrix trace: tr([a b; c d]) = a + d
+%inline public export
+traceBoxMatrix2D : BoxInt -> BoxInt -> BoxInt
+traceBoxMatrix2D (MkBoxInt a) (MkBoxInt d) = MkBoxInt (a + d)
+
