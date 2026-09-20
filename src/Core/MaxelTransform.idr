@@ -1,4 +1,4 @@
-module Core.TransformMultiset
+module Core.MaxelTransform
 
 import public Core.BoxInt
 import public Core.Multiset
@@ -8,6 +8,7 @@ import Data.List
 import Data.Vect
 
 %default total
+
 
 ------------------------------------------------------------------------
 -- 1. THE 4 METRIC GEOMETRY ENUMERATION FOR MAXEL TRANSFORMS
@@ -50,16 +51,6 @@ public export
   show (MkMaxelTransform sec frac (MkBox tPairs)) =
     "MaxelTransform(" ++ show sec ++ ", " ++ show tPairs ++ ")"
 
--- Backwards Compatibility Aliases
-||| @deprecated Legacy type alias. Use MaxelTransform directly.
-public export
-TransformMultiset : Type -> Type -> Type
-TransformMultiset = MaxelTransform
-
-||| @deprecated Legacy constructor alias. Use MkMaxelTransform directly.
-public export
-MkTransformMultiset : MetricSector -> UnixelFraction -> Box (a, b) -> MaxelTransform a b
-MkTransformMultiset = MkMaxelTransform
 
 ------------------------------------------------------------------------
 -- 3. HELPER CONSTRUCTORS & CONVERTERS
@@ -211,8 +202,10 @@ composeTransforms : Eq a => Eq b => Eq c =>
 composeTransforms = composeMaxels
 
 public export
-multiplyMaxels : Eq a => Eq b => Eq c => MaxelTransform a b -> MaxelTransform b c -> MaxelTransform a c
-multiplyMaxels = composeMaxels
+Eq a => Semigroup (MaxelTransform a a) where
+  (<+>) = composeMaxels
+
+
 
 ||| Evaluates higher-order operator contraction over two maxel transforms.
 public export

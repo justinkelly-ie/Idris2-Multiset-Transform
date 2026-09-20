@@ -34,7 +34,7 @@
 - **Logarithmic State Data Structures:** Balanced binary multiset trees (`MultisetTree`) providing $O(\log N)$ parallelized lookup, insertion, and sum preservation over linear lists.
 - **Fast Binary Exponentiation:** Structural fuel-bounded $O(\log k)$ binary exponentiation (`fastNatPower2`).
 
-### 6. `Core.TransformMultiset`
+### 6. `Core.MaxelTransform`
 - **Pushforward & Pullback Operators:** Transform multisets (`TransformMultiset`), forward contraction ($f_*$), and reverse-causal pullback expansion ($f^*$).
 
 ### 7. `Core.UniverseState`, `Core.LinearBuffer` & `Math.LawAlgebra`

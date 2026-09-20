@@ -3,8 +3,9 @@ module Core.ScalePipeline
 import Core.BoxInt
 import Core.Multiset
 import Core.UnixelFraction
-import Core.TransformMultiset
+import Core.MaxelTransform
 import Core.ScaleCategory
+import public Core.FourGeometries
 import Data.List
 
 %default total
@@ -78,16 +79,7 @@ Eq SubatomicParticle where
   (BosonToken b1) == (BosonToken b2) = b1 == b2
   _ == _ = False
 
-||| Legacy Subatomic Color Charge Tokens
-public export
-data ColorCharge = RedColor | GreenColor | BlueColor
 
-public export
-Eq ColorCharge where
-  RedColor == RedColor = True
-  GreenColor == GreenColor = True
-  BlueColor == BlueColor = True
-  _ == _ = False
 
 ------------------------------------------------------------------------
 -- 2. HADRONIC NUCLEON & MESON TOKENS (SCALE LEVEL 2)

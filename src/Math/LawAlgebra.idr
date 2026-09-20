@@ -3,7 +3,7 @@ module Math.LawAlgebra
 import Core.BoxInt
 import Core.Multiset
 import Core.UnixelFraction
-import Core.TransformMultiset
+import Core.MaxelTransform
 import Data.List
 
 %default total
@@ -40,8 +40,9 @@ public export
 record GaloisConnection (a : Type) (b : Type) where
   constructor MkGaloisConnection
   transform   : MaxelTransform a b
-  unitBound   : Box a -> Bool  -- ma <= applyPullback transform (applyPushforward transform ma)
-  counitBound : Box b -> Bool  -- applyPushforward transform (applyPullback transform mb) <= mb
+  domain      : List a
+  unitBound   : Box a -> Bool  -- ma <= applyPullbackExpansion transform domain (applyPushforwardContraction transform ma)
+  counitBound : Box b -> Bool  -- applyPushforwardContraction transform (applyPullbackExpansion transform domain mb) <= mb
 
 ------------------------------------------------------------------------
 -- 3. FORMAL INVARIANT AUDIT PROOFS

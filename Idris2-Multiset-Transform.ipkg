@@ -6,12 +6,13 @@ brief   = "Layer 1 Modernized O(log N) Multiset Trees, Spread Polynumbers, SingF
 depends = Idris2-Multiset-Core, base, linear
 sourcedir = "src"
 
-modules = Core.Goh,
+modules = Transform,
+          Core.Goh,
           Core.LinearBuffer,
           Core.ScaleCategory,
           Core.ScalePipeline,
           Core.ScalePipeline.StreamAdjunction,
-          Core.TransformMultiset,
+          Core.MaxelTransform,
           Core.UniverseState,
           Math.Infinitesimal,
           Math.LawAlgebra,
