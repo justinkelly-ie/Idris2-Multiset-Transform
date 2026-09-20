@@ -11,6 +11,6 @@ import public Math.LawAlgebra
 import public Math.OnSeq.ConjugateAdjunction
 import public Math.OnSeq.SpreadStream
 import public Math.Transform.Reflect.Goh
-import Core.ScalePipeline.StreamAdjunction
+import public Core.ScalePipeline.StreamAdjunction
 
 %default total
