@@ -8,17 +8,11 @@ sourcedir = "src"
 
 modules = Core.Goh,
           Core.LinearBuffer,
-
-          Core.Multiset,
-          Core.MultisetTree,
-          Core.Polynumber,
           Core.ScaleCategory,
           Core.ScalePipeline,
           Core.ScalePipeline.StreamAdjunction,
           Core.TransformMultiset,
           Core.UniverseState,
-          Core.UnixelFraction,
-          Core.VexelMaxel,
           Math.Infinitesimal,
           Math.LawAlgebra,
           Math.OnSeq.ConjugateAdjunction,

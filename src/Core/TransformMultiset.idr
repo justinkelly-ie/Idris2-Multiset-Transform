@@ -51,10 +51,12 @@ public export
     "MaxelTransform(" ++ show sec ++ ", " ++ show tPairs ++ ")"
 
 -- Backwards Compatibility Aliases
+||| @deprecated Legacy type alias. Use MaxelTransform directly.
 public export
 TransformMultiset : Type -> Type -> Type
 TransformMultiset = MaxelTransform
 
+||| @deprecated Legacy constructor alias. Use MkMaxelTransform directly.
 public export
 MkTransformMultiset : MetricSector -> UnixelFraction -> Box (a, b) -> MaxelTransform a b
 MkTransformMultiset = MkMaxelTransform
