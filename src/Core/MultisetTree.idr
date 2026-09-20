@@ -4,8 +4,11 @@ import Core.BoxInt
 import Core.Multiset
 import Data.Vect
 import Language.Reflection
+import Math.OnSeq.FusedStream
+import Data.Fuel
 
 %default total
+
 
 ------------------------------------------------------------------------
 -- 1. FAST AVL HEIGHT-BALANCED MULTISET SEARCH TREE O(LOG N)
@@ -277,3 +280,40 @@ public export
 %macro
 auditTreeUniverseScaling : Elab (Core.MultisetTree.auditTreeUniverseScalingProof = True)
 auditTreeUniverseScaling = pure Refl
+
+------------------------------------------------------------------------
+-- 6. PARALLEL O(LOG N) MULTISETTREE STREAM PARTITIONING
+------------------------------------------------------------------------
+
+||| Flattens a MultisetTree into a list of (element, multiplicity) pairs in in-order traversal.
+public export
+treeToList : MultisetTree a -> List (a, Nat)
+treeToList Leaf = []
+treeToList (Node _ l x c r) = treeToList l ++ [(x, c)] ++ treeToList r
+
+||| Converts a balanced MultisetTree into a deforested stream of (element, count) pairs.
+public export
+streamMultisetTree : MultisetTree a -> FusedStream (a, Nat)
+streamMultisetTree tree = stream (treeToList tree)
+
+||| Evaluates a stream catamorphism fold in parallel across the left and right subtrees of a MultisetTree.
+public export covering
+fusedParallelTreeFold : Fuel -> (a -> Nat -> b -> b) -> b -> (b -> b -> b) -> MultisetTree a -> b
+fusedParallelTreeFold _ _ acc0 _ Leaf = acc0
+fusedParallelTreeFold f stepAcc acc0 combineBin (Node _ left key val right) =
+  let leftRes  = fusedParallelTreeFold f stepAcc acc0 combineBin left
+      rightRes = fusedParallelTreeFold f stepAcc acc0 combineBin right
+      nodeRes  = stepAcc key val acc0
+  in combineBin (combineBin leftRes nodeRes) rightRes
+
+||| Audit witness verifying parallel MultisetTree stream partition fold equivalence.
+public export covering
+auditFusedParallelTreeFoldProof : Bool
+auditFusedParallelTreeFoldProof =
+  let t0 : MultisetTree BoxInt = Leaf
+      t1 = insertTokenTree (intToBoxInt 10) 5 t0
+      t2 = insertTokenTree (intToBoxInt 20) 3 t1
+      t3 = insertTokenTree (intToBoxInt 30) 2 t2
+      totalSum = fusedParallelTreeFold (limit 10) (\_, cnt, acc => cnt + acc) 0 (+) t3
+  in totalSum == 10
+

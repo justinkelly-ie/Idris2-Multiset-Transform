@@ -2,6 +2,7 @@ module Core.VexelMaxel
 
 import Core.BoxInt
 import Core.Multiset
+import Math.Multiset
 import Data.List
 import Data.Vect
 import Language.Reflection
@@ -322,6 +323,33 @@ metricInnerVexel g u v =
   let gv = actMaxelVexel g v
   in dotVexel u gv
 
+public export
+implementation MultisetAlgebra Vexel where
+  zeroM = MkVexel []
+  addM = addVexel
+  scaleM = scaleVexel
+  dotM = dotVexel
+
+||| Computes total weight/mass across all pixels in a Maxel.
+public export
+totalMaxelWeight : Maxel -> BoxInt
+totalMaxelWeight (MkMaxel ps) =
+  sum (map snd ps)
+
+public export
+implementation MultisetAlgebra Maxel where
+  zeroM = MkMaxel []
+  addM = addMaxel
+  scaleM = scaleMaxel
+  dotM m1 m2 = totalMaxelWeight (mulMaxel m1 m2)
+
+public export
+implementation MultisetAlgebra Boxel where
+  zeroM = MkBoxel []
+  addM = addBoxel
+  scaleM = scaleBoxel
+  dotM b1 b2 = totalBoxelWeight (addBoxel b1 b2)
+
 ------------------------------------------------------------------------
 -- 5. ROW & COLUMN VEXEL EXTRACTIONS FROM MAXELS
 ------------------------------------------------------------------------
@@ -395,12 +423,6 @@ sliceBoxelX targetX (MkBoxel voxs) =
   let extracted = mapMaybe (\(MkVoxel x y z, w) =>
                     if x == targetX then Just (MkPixel y z, w) else Nothing) voxs
   in canonicalizeMaxel (MkMaxel extracted)
-
-||| Computes total weight/mass across all pixels in a Maxel.
-public export
-totalMaxelWeight : Maxel -> BoxInt
-totalMaxelWeight (MkMaxel ps) =
-  sum (map snd ps)
 
 ------------------------------------------------------------------------
 -- 7. PHYSICAL, CHEMICAL & BIOLOGICAL PERMUTATIONS

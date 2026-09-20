@@ -335,6 +335,16 @@ public export
 polynumberToSparse : Polynumber -> List (Nat, BoxInt)
 polynumberToSparse (MkPolynumber cs) = toSparseHelper 0 cs
 
+||| Extracts the exact Wildberger Support Supp(P) of a Polynumber (degrees k with non-zero coefficients).
+public export
+polynumberSupport : Polynumber -> List Nat
+polynumberSupport p = map fst (polynumberToSparse p)
+
+||| Computes the cardinality |Supp(P)| of Wildberger's Support.
+public export
+polynumberSupportSize : Polynumber -> Nat
+polynumberSupportSize p = length (polynumberSupport p)
+
 ||| Converts a sparse list of (degree, coeff) pairs back to a normalized dense Polynumber.
 public export
 sparseToPolynumber : List (Nat, BoxInt) -> Polynumber

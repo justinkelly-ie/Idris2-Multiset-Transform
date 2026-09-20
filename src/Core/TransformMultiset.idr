@@ -3,6 +3,7 @@ module Core.TransformMultiset
 import public Core.BoxInt
 import public Core.Multiset
 import public Core.UnixelFraction
+import public Core.VexelMaxel
 import Data.List
 import Data.Vect
 
@@ -24,6 +25,13 @@ Eq MetricSector where
   SubstrateSector == SubstrateSector = True
   _ == _ = False
 
+public export
+Show MetricSector where
+  show EllipticSector = "Elliptic"
+  show HyperbolicSector = "Hyperbolic"
+  show ParabolicSector = "Parabolic"
+  show SubstrateSector = "Substrate"
+
 ------------------------------------------------------------------------
 -- 2. UNIVERSAL MAXEL TRANSFORM RECORD (G_{det g} ⊗ Z_{210} ⊗ Box (a, b))
 ------------------------------------------------------------------------
@@ -36,6 +44,11 @@ record MaxelTransform (a : Type) (b : Type) where
   sector   : MetricSector     -- G_{det g}: Metric canvas signature
   fraction : UnixelFraction   -- Z_{210}: Primorial rational budget weight
   pixelBox : Box (a, b)       -- Pure Pixel Incidence Multiset: ((a, b), w)
+
+public export
+(Show a, Show b) => Show (MaxelTransform a b) where
+  show (MkMaxelTransform sec frac (MkBox tPairs)) =
+    "MaxelTransform(" ++ show sec ++ ", " ++ show tPairs ++ ")"
 
 -- Backwards Compatibility Aliases
 public export
@@ -54,6 +67,32 @@ MkTransformMultiset = MkMaxelTransform
 public export
 mkMaxelTransform : MetricSector -> UnixelFraction -> List ((a, b), BoxInt) -> MaxelTransform a b
 mkMaxelTransform sec frac pairs = MkMaxelTransform sec frac (MkBox pairs)
+
+||| Constructs a Spatial Stencil MaxelTransform mapping spatial neighborhood vectors (Vect n a) to target values b.
+public export
+stencilTransform : MetricSector -> UnixelFraction -> List ((Vect n a, b), BoxInt) -> MaxelTransform (Vect n a) b
+stencilTransform sec frac stencils = mkMaxelTransform sec frac stencils
+
+||| Constructs a 2-form Gauge Curvature Maxel multiset carrying Electric Field E (pixel [1, 0])
+||| and Magnetic Flux B (pixel [2, 3]).
+public export
+makeGaugeFieldMaxel : BoxInt -> BoxInt -> Maxel
+makeGaugeFieldMaxel e b =
+  canonicalizeMaxel (MkMaxel [ (MkPixel 1 0, e), (MkPixel 2 3, b) ])
+
+||| Computes total electromagnetic energy density Q_EM = E^2 + B^2 directly from a 2-form Maxel.
+public export
+gaugeFieldEnergy : Maxel -> BoxInt
+gaugeFieldEnergy m =
+  let e = lookupPixel (MkPixel 1 0) m
+      b = lookupPixel (MkPixel 2 3) m
+  in (e * e) + (b * b)
+
+||| Constructs a U(1) / Dihedral Gauge Phase Rotation MaxelTransform mapping field Maxel states.
+public export
+gaugePhaseTransform : MetricSector -> UnixelFraction -> Maxel -> MaxelTransform Maxel Maxel
+gaugePhaseTransform sec phase field =
+  mkMaxelTransform sec phase [ ((field, field), intToBoxInt 1) ]
 
 public export
 mkTransformBox : MetricSector -> UnixelFraction -> List ((a, b), BoxInt) -> MaxelTransform a b
@@ -104,6 +143,38 @@ applyPullbackExpansion = applyPullback
 public export
 pullback : Eq a => Eq b => MaxelTransform a b -> Box b -> Box a
 pullback = applyPullback
+
+||| Direct pushforward action of a MaxelTransform on a 1D Vexel vector without intermediate list conversion.
+public export
+actTransformVexel : MaxelTransform Unixel Unixel -> Vexel -> Vexel
+actTransformVexel (MkMaxelTransform _ _ (MkBox tPairs)) (MkVexel sings) =
+  let pushedBox = foldl (\acc, ((uSrc, uTgt), wT) =>
+                    let wS = lookupUnixel uSrc (MkVexel sings)
+                    in insertBox uTgt (wS * wT) acc) emptyBox tPairs
+  in MkVexel (items pushedBox)
+
+||| Direct pushforward action of a MaxelTransform on a 2D Maxel matrix.
+public export
+actTransformMaxel : MaxelTransform Pixel Pixel -> Maxel -> Maxel
+actTransformMaxel (MkMaxelTransform _ _ (MkBox tPairs)) (MkMaxel pxs) =
+  let pushedBox = foldl (\acc, ((pSrc, pTgt), wT) =>
+                    let wM = lookupPixel pSrc (MkMaxel pxs)
+                    in insertBox pTgt (wM * wT) acc) emptyBox tPairs
+  in MkMaxel (items pushedBox)
+
+||| Converts a 2D Maxel matrix directly into a MaxelTransform without passing through raw List pairs.
+public export
+maxelToTransform : MetricSector -> UnixelFraction -> Maxel -> MaxelTransform Unixel Unixel
+maxelToTransform sec frac (MkMaxel pxs) =
+  let pairs = map (\(MkPixel i j, w) => ((MkUnixel i, MkUnixel j), w)) pxs
+  in MkMaxelTransform sec frac (MkBox pairs)
+
+||| Converts a MaxelTransform back into a canonical 2D Maxel matrix.
+public export
+transformToMaxel : MaxelTransform Unixel Unixel -> Maxel
+transformToMaxel (MkMaxelTransform _ _ (MkBox tPairs)) =
+  let pxs = map (\((MkUnixel i, MkUnixel j), w) => (MkPixel i j, w)) tPairs
+  in canonicalizeMaxel (MkMaxel pxs)
 
 ------------------------------------------------------------------------
 -- 5. MAXEL PIXEL FUSION COMPOSITION

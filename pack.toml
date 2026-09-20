@@ -1,6 +1,6 @@
 [package]
 name = "Idris2-Multiset-Transform"
-version = "0.3.0"
+version = "0.3.1"
 ipkg = "Idris2-Multiset-Transform.ipkg"
 
 [custom.all.Idris2-Multiset-Core]

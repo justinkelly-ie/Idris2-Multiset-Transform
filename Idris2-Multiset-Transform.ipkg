@@ -1,26 +1,28 @@
 package Idris2-Multiset-Transform
-version = 0.1.0
+version = 0.3.1
 authors = "Justin Kelly"
 brief   = "Layer 1 Modernized O(log N) Multiset Trees, Spread Polynumbers, SingFractions, and Galois Law Algebra."
 
-depends = base
-        , Idris2-Multiset-Core
-
-modules = Core.BoxInt
-        , Core.Multiset
-        , Core.MultisetTree
-        , Core.Polynumber
-        , Core.UnixelFraction
-        , Core.VexelMaxel
-        , Core.UniverseState
-        , Core.Interfaces.StatefulLaw
-        , Core.LinearBuffer
-        , Core.TransformMultiset
-        , Core.ScalePipeline
-        , Core.ScaleCategory
-        , Core.Goh
-        , Math.LawAlgebra
-        , Math.Transform.Reflect.Goh
-
+depends = Idris2-Multiset-Core, base, linear
 sourcedir = "src"
+
+modules = Core.Goh,
+          Core.LinearBuffer,
+
+          Core.Multiset,
+          Core.MultisetTree,
+          Core.Polynumber,
+          Core.ScaleCategory,
+          Core.ScalePipeline,
+          Core.ScalePipeline.StreamAdjunction,
+          Core.TransformMultiset,
+          Core.UniverseState,
+          Core.UnixelFraction,
+          Core.VexelMaxel,
+          Math.Infinitesimal,
+          Math.LawAlgebra,
+          Math.OnSeq.ConjugateAdjunction,
+          Math.OnSeq.SpreadStream,
+          Math.Transform.Reflect.Goh
+
 

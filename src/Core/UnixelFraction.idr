@@ -106,6 +106,27 @@ public export
 scaleUnixelFraction : BoxInt -> UnixelFraction -> UnixelFraction
 scaleUnixelFraction s (MkUnixelFraction n d) = MkUnixelFraction (s * n) d
 
+||| Euclidean GCD algorithm on Nat with explicit fuel for total compile-time reduction.
+public export
+gcdNat : (fuel : Nat) -> Nat -> Nat -> Nat
+gcdNat Z _ _ = 1
+gcdNat (S _) a Z = if a == 0 then 1 else a
+gcdNat (S _) Z b = if b == 0 then 1 else b
+gcdNat (S f) a b =
+  let remVal = integerToNat (natToInteger a `mod` natToInteger b)
+  in if remVal == 0 then b else gcdNat f b remVal
+
+||| Reduces a UnixelFraction to canonical lowest terms via GCD.
+public export
+reduceUnixelFraction : UnixelFraction -> UnixelFraction
+reduceUnixelFraction (MkUnixelFraction n (MkUnixel d)) =
+  let nNat = boxToNat (absBox n)
+      g = gcdNat (nNat + d) nNat d
+      g' = if g == 0 then 1 else g
+      newNum = n `div` intToBoxInt (natToInteger g')
+      newDen = integerToNat (natToInteger d `div` natToInteger g')
+  in mkUnixelFraction newNum (if newDen == 0 then 1 else newDen)
+
 ||| Structurally bounded integer to Nat conversion ensuring total compile-time reduction.
 
 ||| Inversion / Division: (n1/d1) / (n2/d2) where n2 != 0.
