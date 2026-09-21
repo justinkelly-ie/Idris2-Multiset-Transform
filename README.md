@@ -1,11 +1,11 @@
-# Idris2-Multiset-Transform
+# FinSc-Multiset-Transform
 
 [![Idris 2 Verification](https://img.shields.io/badge/Idris_2-0.8.0-blue.svg)](https://www.idris-lang.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **Layer 2 Exact Rational Fields, Goh Polynomial Factorizations & 5-Stage Scale Category Engine for Idris 2**
 
-`Idris2-Multiset-Transform` forms the primary engine of **Layer 2** in the 10-layer constructive non-linear multiset science framework. It provides exact rational arithmetic (`UnixelFraction`), 1D Vexels & 2D Maxel matrices (`VexelMaxel`), monomorphic integer box matrix multiplication (`multBoxMatrix2D`), Goh spread polynomial factorizations (`GohMultiset`), $O(\log N)$ parallelized multiset trees (`MultisetTree`), and the formal 5-stage scale category (`ScaleCategory` & `ScalePipeline`).
+`FinSc-Multiset-Transform` forms the primary engine of **Layer 2** in the 10-layer constructive non-linear multiset science framework. It provides exact rational arithmetic (`UnixelFraction`), 1D Vexels & 2D Maxel matrices (`VexelMaxel`), monomorphic integer box matrix multiplication (`multBoxMatrix2D`), Goh spread polynomial factorizations (`GohMultiset`), $O(\log N)$ parallelized multiset trees (`MultisetTree`), and the formal 5-stage scale category (`ScaleCategory` & `ScalePipeline`).
 
 ---
 
@@ -46,8 +46,8 @@
 ## 🚀 Building & Installing
 
 ```bash
-idris2 --build Idris2-Multiset-Transform.ipkg
-idris2 --install Idris2-Multiset-Transform.ipkg
+idris2 --build FinSc-Multiset-Transform.ipkg
+idris2 --install FinSc-Multiset-Transform.ipkg
 ```
 
 ---

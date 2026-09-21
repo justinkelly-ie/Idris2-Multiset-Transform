@@ -1,9 +1,9 @@
-package Idris2-Multiset-Transform
+package FinSc-Multiset-Transform
 version = 0.3.1
 authors = "Justin Kelly"
 brief   = "Layer 1 Modernized O(log N) Multiset Trees, Spread Polynumbers, SingFractions, and Galois Law Algebra."
 
-depends = Idris2-Multiset-Core, base, linear
+depends = FinSc-Multiset-Core, base, linear
 sourcedir = "src"
 
 modules = Transform,
